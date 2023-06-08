@@ -20,7 +20,9 @@ int main(int argc, char *argv[])
     }
 
     void *map_start = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_PRIVATE, fd, 0);
-    printf("Type     Offset    VirtAddr  PhysAddr   FileSiz MemSiz  Flg   Align\n");
+
+    // Print each program header's information
+    printf("Type     Offset    VirtAddr  PhysAddr   FileSiz MemSiz  Flg   Align ProtFlg MapFlg\n");
     foreach_phdr(map_start, print_Phdr_info, -1);
 
     close(fd);
@@ -52,11 +54,21 @@ void print_Phdr_info(Elf32_Phdr *program_header, int index)
                                                     : program_header->p_type == 4   ? "NOTE"
                                                     : program_header->p_type == 5   ? "SHLIB"
                                                                                     : "PHDR";
+
     char *flags = program_header->p_flags == 0x1 ? "E" : program_header->p_flags == 0x2 ? "W"
                                                      : program_header->p_flags == 0x3   ? "W E"
                                                      : program_header->p_flags == 0x4   ? "R"
                                                      : program_header->p_flags == 0x5   ? "R E"
                                                      : program_header->p_flags == 0x6   ? "R W"
                                                                                         : "R W E";
-    printf("%-8s %#08x %#010x %#010x %#07x %#07x %-5s %#x\n", type, program_header->p_offset, program_header->p_vaddr, program_header->p_paddr, program_header->p_filesz, program_header->p_memsz, flags, program_header->p_align);
+
+    char *prot_flags = program_header->p_type != 1 ? "" : program_header->p_flags == 0x1 ? "PROC_EXEC" : program_header->p_flags == 0x2 ? "PROT_WRITE"
+                                                                  : program_header->p_flags == 0x3   ? "PROT_WRITE PROC_EXEC"
+                                                                  : program_header->p_flags == 0x4   ? "PROT_READ"
+                                                                  : program_header->p_flags == 0x5   ? "PROT_READ PROC_EXEC"
+                                                                  : program_header->p_flags == 0x6   ? "PROT_READ PROT_WRITE"
+                                                                                                     : "PROT_READ PROT_WRITE PROC_EXEC";
+    char *map_flags = program_header->p_type != 1 ? "" : "MAP_PRIVATE";
+    
+    printf("%-8s %#08x %#010x %#010x %#07x %#07x %-5s %#06x %s %s\n", type, program_header->p_offset, program_header->p_vaddr, program_header->p_paddr, program_header->p_filesz, program_header->p_memsz, flags, program_header->p_align, prot_flags, map_flags);
 }
