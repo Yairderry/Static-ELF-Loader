@@ -8,6 +8,7 @@
 int foreach_phdr(void *map_start, void (*func)(Elf32_Phdr *, int), int arg);
 void load_phdr(Elf32_Phdr *phdr, int fd);
 void print_Phdr_info(Elf32_Phdr *program_header, int index);
+int extern startup(int argc, char **argv, void (*start)());
 
 int main(int argc, char *argv[])
 {
@@ -20,11 +21,12 @@ int main(int argc, char *argv[])
     }
 
     void *map_start = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
+    Elf32_Ehdr *elf_header = map_start;
 
-    fd = open(argv[1], O_RDONLY);
     printf("Type     Offset    VirtAddr  PhysAddr   FileSiz MemSiz  Flg   Align ProtFlg MapFlg\n");
     foreach_phdr(map_start, load_phdr, fd);
+
+    startup(argc - 1, argv + 1, (void *)(elf_header->e_entry));
 
     close(fd);
     return 0;
