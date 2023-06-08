@@ -26,11 +26,11 @@ startup:
         shl     eax,2
         
 loop1:                          ; Push evry char* of argv for _start
-                mov     edx,ebx
-                add     edx,eax                
-                push    dword[edx]
-                sub     eax,4
-                loop    loop1,ecx
+        mov     edx,ebx
+        add     edx,eax                
+        push    dword[edx]
+        sub     eax,4
+        loop    loop1,ecx
 
         mov     ecx,[ebp+8]     ; Gets argc from C
         push    ecx             ; Push argc for _start
@@ -42,5 +42,5 @@ loop1:                          ; Push evry char* of argv for _start
 	add	esp, 4		; Cleans the stuck
 	pop	ebp		; Restore caller state
 	ret                     ; Back to caller
-startup_end
+startup_end:
 
