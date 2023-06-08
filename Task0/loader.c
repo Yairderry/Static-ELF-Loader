@@ -4,8 +4,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <elf.h>
+
 int foreach_phdr(void *map_start, void (*func)(Elf32_Phdr *, int), int arg);
-void print_address(Elf32_Phdr *program_header, int index);
+void print_Phdr_address(Elf32_Phdr *program_header, int index);
 
 int main(int argc, char *argv[])
 {
@@ -13,12 +14,12 @@ int main(int argc, char *argv[])
 
     if (fd == -1)
     {
-        perror("open()");
+        fprintf(stderr, "Couldn't open file %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
 
     void *map_start = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_PRIVATE, fd, 0);
-    foreach_phdr(map_start, print_address, -1);
+    foreach_phdr(map_start, print_Phdr_address, -1);
 
     close(fd);
     return 0;
@@ -36,7 +37,7 @@ int foreach_phdr(void *map_start, void (*func)(Elf32_Phdr *, int), int arg)
     return 0;
 }
 
-void print_address(Elf32_Phdr *program_header, int index)
+void print_Phdr_address(Elf32_Phdr *program_header, int index)
 {
     printf("Program header number %d at address %x\n", index, program_header->p_vaddr);
 }
